@@ -1,0 +1,43 @@
+
+name: Compilar APK Android
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Dar permissão ao Gradle
+        run: chmod +x gradlew
+        if: ${{ hashFiles('gradlew') != '' }}
+
+      - name: Compilar APK
+        run: |
+          if [ -f ./gradlew ]; then
+            ./gradlew assembleDebug
+          elif [ -f ./gradle/wrapper/gradle-wrapper.properties ]; then
+            gradle assembleDebug
+          else
+            echo "ERRO: Gradle Wrapper não encontrado na raiz."
+            exit 1
+          fi
+
+      - name: Disponibilizar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: APK-Android
+          path: '**/build/outputs/apk/**/*.apk'
+          if-no-files-found: error
