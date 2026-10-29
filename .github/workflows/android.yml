@@ -20,20 +20,13 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Dar permissão ao Gradle
-        run: chmod +x gradlew
-        if: ${{ hashFiles('gradlew') != '' }}
+      - name: Instalar Gradle
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gradle
 
       - name: Compilar APK
-        run: |
-          if [ -f ./gradlew ]; then
-            ./gradlew assembleDebug
-          elif [ -f ./gradle/wrapper/gradle-wrapper.properties ]; then
-            gradle assembleDebug
-          else
-            echo "ERRO: Gradle Wrapper não encontrado na raiz."
-            exit 1
-          fi
+        run: gradle assembleDebug
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
